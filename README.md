@@ -4,7 +4,7 @@
 >
 > Its results can be used as Baseline of OCT research
 
-```bash
+```shell
 python main.py -h
 python Eval.py -h
 ```
@@ -13,7 +13,7 @@ Type these two commands in your command line to see help menu for this project.
 
 Also you can use sklearn.metric to do your own metric measurement.
 
-The data set link is 
+The data set link is https://jbox.sjtu.edu.cn/l/XH2KA7
 
 ---
 
