@@ -61,10 +61,8 @@ model.load_state_dict(torch.load('./results/{}/Best-Model-bsize{}.pth'.format(ar
 def step(model, batch):
     images, labels = batch
     out = model(images)  # Generate predictions
-    # print(labels.size())
-    # print(out.size())
     preds = torch.max(out, dim=1)[1]
-    # acc = accuracy(out, labels)  # Calculate accuracy
+
     return {'preds': preds, 'labels': labels}
 
 
@@ -74,35 +72,12 @@ def evaluate(model, val_loader):
     outputs = [step(model, batch) for batch in val_loader]
     Preds = [x['preds'] for x in outputs]
     Labels = [x['labels'] for x in outputs]
-    print(Preds, Labels)
+    # print(Preds, Labels)
 
     Preds = torch.cat(Preds, dim=0).cpu()
     Labels = torch.cat(Labels, dim=0).cpu()
 
     print('General Evaluation')
-
-    right_item = 0
-
-    eva_sys = {'TP0': 0, 'TN0': 0, 'FP0': 0, 'FN0': 0,
-               'TP1': 0, 'TN1': 0, 'FP1': 0, 'FN1': 0,
-               'TP2': 0, 'TN2': 0, 'FP2': 0, 'FN2': 0,
-               'TP3': 0, 'TN3': 0, 'FP3': 0, 'FN3': 0,
-               'TP4': 0, 'TN4': 0, 'FP4': 0, 'FN4': 0}
-
-    for i in range(380):
-        if Preds[i] == 0:
-            eva_sys['TP0'] += 1
-            right_item += 1
-        else:
-            eva_sys['FN0'] += 1
-            eva_sys['FP{}'.format(Preds[i])] += 1
-    for i in range(380, 760):
-        if Preds[i] == 1:
-            eva_sys['TP1'] += 1
-            right_item += 1
-        else:
-            eva_sys['FN0'] += 1
-            eva_sys['FP{}'.format(Preds[i])] += 1
 
     y_pred = []
     y_true = []
@@ -131,11 +106,11 @@ def evaluate(model, val_loader):
     t = classification_report(y_true, y_pred, target_names=['AMD', 'DME', 'NM', 'PCV', 'PM'])
     print(t)
 
-    # Precision | Recall | F1 - score | AUC
+    # Precision | Recall | F1 - score
     acc_all = accuracy_score(Labels, Preds)
-    ap_all = precision_score(Labels, Preds)
-    ar_all = recall_score(Labels, Preds)
-    f1_all = f1_score(Labels, Preds)
+    ap_all = precision_score(Labels, Preds, average='macro')
+    ar_all = recall_score(Labels, Preds, average='macro')
+    f1_all = f1_score(Labels, Preds, average='macro')
     print(acc_all, ap_all, ar_all, f1_all)
     # print("accu: {:.4f}, ap: {:.4f}, ar: {:.4f}, f1_score: {:4f}".format(
     #     acc_all, ap_all, ar_all, f1_all))
