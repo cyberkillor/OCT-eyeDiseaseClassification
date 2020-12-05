@@ -11,4 +11,6 @@ python Eval.py -h
 
 Type these two commands in your command line to see help menu for this project.
 
-Also you can use sklearn.metric to do your own metric measurement。
+Also you can use sklearn.metric to do your own metric measurement.
+
+The data set link is 
