@@ -8,7 +8,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = str(np.argmax(memory_gpu))
 os.system('rm tmp')
 
 import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, auc, classification_report
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, auc, classification_report, confusion_matrix
 import argparse
 import Resnet
 import VGG
@@ -137,8 +137,25 @@ def evaluate(model, val_loader):
     ar_all = recall_score(Labels, Preds)
     f1_all = f1_score(Labels, Preds)
     print(acc_all, ap_all, ar_all, f1_all)
-    print("accu: {:.4f}, ap: {:.4f}, ar: {:.4f}, f1_score: {:4f}".format(
-        acc_all, ap_all, ar_all, f1_all))
-
+    # print("accu: {:.4f}, ap: {:.4f}, ar: {:.4f}, f1_score: {:4f}".format(
+    #     acc_all, ap_all, ar_all, f1_all))
+    
+    # draw confuse matrix
+    classes = ['AMD', 'DME', 'NM', 'PCV', 'PM']
+    cm = confusion_matrix(y_true, y_pred)
+    fig,ax = plt.subplots()
+    plt.imshow(cm, cmap=plt.cm.Greens)
+    indices = range(len(cm))
+    ndices = range(len(cm))plt.xticks(indices, classes)
+    plt.yticks(indices, classes)
+    plt.colorbar()
+    plt.xlabel('Pred')
+    plt.ylabel('True')
+    
+    for first_index in range(len(cm)):
+        for second_index in range(len(cm[first_index])):
+            plt.text(first_index, second_index, cm[first_index][second_index])
+    fig.savefig("./img/{}/Best-cm-img{}.png".format(args.model, args.bsize),
+                dpi=320, format='png')
 
 evaluate(model, val_dl)
