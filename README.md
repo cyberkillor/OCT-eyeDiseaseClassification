@@ -15,5 +15,7 @@ Also you can use sklearn.metric to do your own metric measurement.
 
 The data set link is 
 
-sample image:
+---
+
+Sample image:
 ![image](https://github.com/cyberkillor/DIP-OCT-Classification/blob/main/img/Best-cm-img8.png)
