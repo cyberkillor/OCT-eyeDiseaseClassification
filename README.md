@@ -5,6 +5,7 @@
 > Its results can be used as Baseline of OCT research
 
 ```shell
+pip install -r requirement.txt
 python main.py -h
 python Eval.py -h
 ```
