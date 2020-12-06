@@ -121,7 +121,7 @@ def evaluate(model, val_loader):
     fig,ax = plt.subplots()
     plt.imshow(cm, cmap=plt.cm.Greens)
     indices = range(len(cm))
-    ndices = range(len(cm))plt.xticks(indices, classes)
+    plt.xticks(indices, classes)
     plt.yticks(indices, classes)
     plt.colorbar()
     plt.xlabel('Pred')
