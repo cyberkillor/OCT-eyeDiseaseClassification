@@ -9,10 +9,20 @@ def accuracy(outputs, labels):
     return torch.tensor(torch.sum(preds == labels).item() / len(preds))
 
 
-def training_step(model, batch):
+def training_step(model, batch, args):
     images, labels = batch
     out = model(images)  # Generate predictions
-    loss = F.cross_entropy(out, labels)  # Calculate loss
+
+    if args.model == 'googlenet':
+        logits, aux_logits2, aux_logits1 = out
+
+        loss0 = F.cross_entropy(logits, labels)
+        loss1 = F.cross_entropy(aux_logits1, labels)
+        loss2 = F.cross_entropy(aux_logits2, labels)
+
+        loss = loss0 + loss1 * 0.3 + loss2 * 0.3
+    else:
+        loss = F.cross_entropy(out, labels)  # Calculate loss
 
     return loss
 
@@ -37,7 +47,7 @@ def epoch_end(epoch, result, model, args):
     print("Epoch [{}], train_loss: {:.4f}, val_loss: {:.4f}, val_acc: {:.4f}".format(
         epoch, result['train_loss'], result['val_loss'], result['val_acc']))
     global best_accu
-    if epoch > 80 and result['val_acc'] > best_accu and result['train_loss'] < 0.01:
+    if args.ifSave and epoch > 80 and result['val_acc'] > best_accu and result['train_loss'] < 0.01:
         best_accu = result['val_acc']
         print('best_accu: {}'.format(best_accu))
         torch.save({'state_dict': model.state_dict()},
@@ -76,7 +86,7 @@ def fit_one_cycle(epochs, max_lr, model, train_loader, val_loader, args,
         train_losses = []
         lrs = []
         for batch in train_loader:
-            loss = training_step(model, batch)
+            loss = training_step(model, batch, args)
             train_losses.append(loss)
             loss.backward()
 
