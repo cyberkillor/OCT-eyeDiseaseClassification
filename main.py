@@ -11,12 +11,10 @@ import torch
 import torchvision.transforms as tt
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
-import Model
-import vgg_of
+from Models import Resnet, VGG, GoogleNet
 from GPU import get_default_device, to_device, DeviceDataLoader
 from Train import fit_one_cycle
 import argparse
-from GoogleNet import GoogLeNet
 
 # initialize input
 pars = argparse.ArgumentParser()
@@ -61,13 +59,13 @@ train_dl = DeviceDataLoader(train_dl, device)
 val_dl = DeviceDataLoader(valid_dl, device)
 
 if args.model == 'res18':
-    model = Model.resnet18()
+    model = Resnet.resnet18()
 elif args.model == 'res34':
-    model = Model.resnet34()
+    model = Resnet.resnet34()
 elif args.model == 'vgg16':
-    model = vgg_of.vgg16_bn()
+    model = VGG.vgg16_bn()
 elif args.model == 'googlenet':
-    model = GoogLeNet(num_classes=5, init_weights=True)
+    model = GoogleNet.GoogLeNet(num_classes=5, init_weights=True)
 else:
     print("Model Fault!")
     exit(-1)
