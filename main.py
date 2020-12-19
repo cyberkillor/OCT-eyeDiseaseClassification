@@ -11,21 +11,26 @@ import torch
 import torchvision.transforms as tt
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
-import Resnet
-import VGG
+import Model
+import vgg_of
 from GPU import get_default_device, to_device, DeviceDataLoader
 from Train import fit_one_cycle
 import argparse
+from GoogleNet import GoogLeNet
 
 # initialize input
 pars = argparse.ArgumentParser()
-pars.add_argument('--model', '-m', type=str, default='res18', metavar='M', help='type of model (res18, res34 or vgg16)')
-pars.add_argument('--bsize', '-bs', type=int, default=8, metavar='S', help='batch size of the train data (8, 16, 32, 64 or 128)')
-pars.add_argument('--lr', type=float, default=0.0001, metavar='LR', help='learning rate of model')
+pars.add_argument('--model', '-m', type=str, default='res18', metavar='M',
+                  help='type of model (res18, res34, vgg16 or googlenet)')
+pars.add_argument('--bsize', '-bs', type=int, default=8, metavar='S',
+                  help='batch size of the train data (8, 16, 32, 64 or 128)')
+pars.add_argument('--lr', type=float, default=0.001, metavar='LR', help='learning rate of model')
 pars.add_argument('--epoch', '-e', type=int, default=200, metavar='E', help='epochs of training')
 pars.add_argument('--grad_clip', type=float, default=0.1, metavar='G', help='set grad_clip to avoid grad explosion')
 pars.add_argument('--weight_decay', type=float, default=1e-4, metavar='WD', help='set weight_decay')
 pars.add_argument('--data', '-d', type=str, default='./JZ20200509/', metavar='D', help='location of data folder')
+pars.add_argument('--ifSave', '-b', type=bool, default=False, metavar='B',
+                  help='whether to save results during training')
 args = pars.parse_args()
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -33,8 +38,10 @@ data_dir = args.data
 
 # pre processing
 tfms = tt.Compose([
-    tt.Resize((224, 224)),
-    tt.CenterCrop(192),
+    tt.Resize(256),
+    # tt.Resize((224, 224)),
+    tt.CenterCrop(224),
+    # tt.Grayscale(num_output_channels=1),
     tt.ToTensor(),
     tt.Normalize(mean=[0.485, 0.456, 0.406],
                  std=[0.229, 0.224, 0.225])
@@ -54,16 +61,19 @@ train_dl = DeviceDataLoader(train_dl, device)
 val_dl = DeviceDataLoader(valid_dl, device)
 
 if args.model == 'res18':
-    model = Resnet.resnet18()
+    model = Model.resnet18()
 elif args.model == 'res34':
-    model = Resnet.resnet34()
+    model = Model.resnet34()
 elif args.model == 'vgg16':
-    model = VGG.vgg16_bn()
+    model = vgg_of.vgg16_bn()
+elif args.model == 'googlenet':
+    model = GoogLeNet(num_classes=5, init_weights=True)
 else:
+    print("Model Fault!")
     exit(-1)
 
 print('Using GPU:' + str(np.argmax(memory_gpu)))
-# print(model)
+print(model)
 to_device(model, device)
 
 # Training steps
