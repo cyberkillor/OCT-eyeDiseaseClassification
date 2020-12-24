@@ -4,6 +4,17 @@ import torch.nn.functional as F
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
 best_accu = 0
+
+
+def enumerate_robnet_large(num):
+    from itertools import product
+    arch_list = list(product(['01', '10', '11'], repeat=14))
+    arch_list = [list(ele) for ele in arch_list]
+    import random
+    random.shuffle(arch_list)
+    return arch_list[:num]
+
+
 def accuracy(outputs, labels):
     _, preds = torch.max(outputs, dim=1)
     return torch.tensor(torch.sum(preds == labels).item() / len(preds))
@@ -47,6 +58,7 @@ def epoch_end(epoch, result, model, args):
     print("Epoch [{}], train_loss: {:.4f}, val_loss: {:.4f}, val_acc: {:.4f}".format(
         epoch, result['train_loss'], result['val_loss'], result['val_acc']))
     global best_accu
+
     if args.Save and epoch > 80 and result['val_acc'] > best_accu and result['train_loss'] < 0.005:
         best_accu = result['val_acc']
         print('best_accu: {}'.format(best_accu))
@@ -54,7 +66,8 @@ def epoch_end(epoch, result, model, args):
             torch.save({'state_dict': model.state_dict()},
                        './results/{}/Best-Model-bsize{}.pth'.format(args.model, args.bsize))
         else:
-            torch.save({'state_dict': model.state_dict()}, './results/{}/Best-Model-bsize{}-pt.pth'.format(args.model, args.bsize))
+            torch.save({'state_dict': model.state_dict()},
+                       './results/{}/Best-Model-bsize{}-pt.pth'.format(args.model, args.bsize))
 
 
 # Traning
