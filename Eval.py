@@ -8,47 +8,54 @@ os.environ["CUDA_VISIBLE_DEVICES"] = str(np.argmax(memory_gpu))
 os.system('rm tmp')
 
 import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score, \
-    classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score, classification_report, confusion_matrix
 import argparse
-import Resnet
-import VGG
+import Model
+import vgg_of
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
 import torch
 import torch.nn.functional as F
 import torchvision.transforms as tt
 from GPU import get_default_device, to_device, DeviceDataLoader
+import random
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', '-m', type=str, default='res18', metavar='M',
                     help='type of model (res18, res34 or vgg16)')
 parser.add_argument('--bsize', '-bs', type=int, default=8, metavar='S',
                     help='batch size of the train data (8, 16, 32, 64 or 128)')
-parser.add_argument('--data', '-d', type=str, default='./JZ20200509/', metavar='D',
-                    help='location of data')
+parser.add_argument('--pretrained', default='False', action='store_true',
+		                  help='eval finetuned pretrainded model')
 args = parser.parse_args()
-print(args.model, args.bsize)
+print(args.model, args.bsize, args.pretrained)
 device = get_default_device()
-torch.manual_seed(111)
+
+# set seed
+seed = 1111
+random.seed(seed)
+np.random.seed(seed)
+torch.manual_seed(seed)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 if args.model == 'res18':
-    model = Resnet.resnet18()
+    model = Model.resnet18(pretrained=args.pretrained)
 elif args.model == 'res34':
-    model = Resnet.resnet34()
+    model = Model.resnet34(pretrained=args.pretrained)
 elif args.model == 'vgg16':
-    model = VGG.vgg16_bn()
+    model = vgg_of.vgg16_bn(pretrained=args.pretrained)
 else:
     exit(-1)
-print(model)
+# print(model)
 to_device(model, device)
-print('Using GPU:' + str(np.argmax(memory_gpu)))
-
+print('Using GPU:' + str(np.argmax(memory_gpu))) 
 # load data
-data_dir = args.data
+data_dir = './JZ20200509/'
 tfms = tt.Compose([
-    tt.Resize((224, 224)),
-    tt.CenterCrop(192),
+    tt.Resize(256),
+    tt.CenterCrop(224),
     tt.ToTensor(),
     tt.Normalize(mean=[0.485, 0.456, 0.406],
                  std=[0.229, 0.224, 0.225])
@@ -61,7 +68,11 @@ valid_dl = DataLoader(valid_ds, batch_size * 4, num_workers=8, pin_memory=True)
 train_dl = DeviceDataLoader(train_dl, device)
 val_dl = DeviceDataLoader(valid_dl, device)
 
-model.load_state_dict(torch.load('./results/{}/Best-Model-bsize{}.pth'.format(args.model, args.bsize))['state_dict'])
+print(args.pretrained)
+if args.pretrained is True:
+    model.load_state_dict(torch.load('./results/{}/Best-Model-bsize{}-pt.pth'.format(args.model, args.bsize))['state_dict'])
+else:
+    model.load_state_dict(torch.load('./results/{}/Best-Model-bsize{}.pth'.format(args.model, args.bsize))['state_dict'])
 
 
 def step(model, batch):
@@ -79,12 +90,12 @@ def evaluate(model, val_loader):
     outputs = [step(model, batch) for batch in val_loader]
     Preds = [x['preds'] for x in outputs]
     Labels = [x['labels'] for x in outputs]
-    Outs = [x['out'] for x in outputs]
+    Outs = [x['out'] for x in outputs]    
 
-    Preds = torch.cat(Preds, dim=0).cpu()
-    Labels = torch.cat(Labels, dim=0).cpu()
-    Outs = torch.cat(Outs, dim=0).cpu()
-    Scores = F.softmax(Outs, dim=1)
+    Preds = torch.cat(Preds,dim=0).cpu()
+    Labels = torch.cat(Labels,dim=0).cpu()
+    Outs = torch.cat(Outs,dim=0).cpu()
+    Scores = F.softmax(Outs,dim=1)    
 
     print(Preds, Labels, Scores)
     print(Preds.size(), len(Labels), Scores.size())
@@ -120,14 +131,16 @@ def evaluate(model, val_loader):
             y_true.append('PCV')
         elif Labels[i] == 4:
             y_true.append('PM')
-    t = classification_report(y_true, y_pred, output_dict=True,
+    t1 = classification_report(y_true, y_pred, # output_dict=True, 
                               target_names=['AMD', 'DME', 'NM', 'PCV', 'PM'])
-    print(t)
+    t2 = classification_report(y_true, y_pred, output_dict=True, target_names=['AMD', 'DME', 'NM', 'PCV', 'PM'])
+    print(t1)
+    print(t2)
 
     # draw confuse matrix
     classes = ['AMD', 'DME', 'NM', 'PCV', 'PM']
     cm = confusion_matrix(y_true, y_pred)
-    fig, ax = plt.subplots()
+    fig,ax = plt.subplots()
     plt.imshow(cm, cmap=plt.cm.Greens)
     indices = range(len(cm))
     plt.xticks(indices, classes)
@@ -140,16 +153,15 @@ def evaluate(model, val_loader):
         for second_index in range(len(cm[first_index])):
             plt.text(first_index, second_index, cm[first_index][second_index])
 
-    fig.savefig("./img/{}/Best-cm-img{}.png".format(args.model, args.bsize),
+    fig.savefig("./img/{}/Best-cm-img{}.png".format(args.model, args.bsize), 
                 dpi=320, format='png')
     # print("accu: {:.4f}, ap: {:.4f}, ar: {:.4f}, f1_score: {:4f}".format(
     #     acc_all, ap_all, ar_all, f1_all))
-
+    
     # cal auc
     roc_ovr = roc_auc_score(Labels, Scores, multi_class='ovr')
     print('--roc-ovr:', roc_ovr)
     roc_ovo = roc_auc_score(Labels, Scores, multi_class='ovo')
     print('--roc-ovo:', roc_ovo)
-
 
 evaluate(model, val_dl)
