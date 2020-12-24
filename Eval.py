@@ -10,8 +10,7 @@ os.system('rm tmp')
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score, classification_report, confusion_matrix
 import argparse
-import Model
-import vgg_of
+from Models import Resnet, VGG, GoogleNet
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
 import torch
@@ -22,7 +21,7 @@ import random
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', '-m', type=str, default='res18', metavar='M',
-                    help='type of model (res18, res34 or vgg16)')
+                    help='type of model (res18, res34, vgg16 or googlenet)')
 parser.add_argument('--bsize', '-bs', type=int, default=8, metavar='S',
                     help='batch size of the train data (8, 16, 32, 64 or 128)')
 parser.add_argument('--pretrained', default='False', action='store_true',
@@ -41,11 +40,13 @@ if torch.cuda.is_available():
     torch.cuda.manual_seed_all(seed)
 
 if args.model == 'res18':
-    model = Model.resnet18(pretrained=args.pretrained)
+    model = Resnet.resnet18(pretrained=args.pretrained)
 elif args.model == 'res34':
-    model = Model.resnet34(pretrained=args.pretrained)
+    model = Resnet.resnet34(pretrained=args.pretrained)
 elif args.model == 'vgg16':
-    model = vgg_of.vgg16_bn(pretrained=args.pretrained)
+    model = VGG.vgg16_bn(pretrained=args.pretrained)
+elif args.model == 'googlenet':
+    model = GoogleNet.GoogLeNet(num_classes=5, init_weights=True)
 else:
     exit(-1)
 # print(model)
@@ -152,8 +153,11 @@ def evaluate(model, val_loader):
     for first_index in range(len(cm)):
         for second_index in range(len(cm[first_index])):
             plt.text(first_index, second_index, cm[first_index][second_index])
-
-    fig.savefig("./img/{}/Best-cm-img{}.png".format(args.model, args.bsize), 
+    if args.pretrained:
+        fig.savefig("./img/{}/Best-cm-img{}-pt.png".format(args.model, args.bsize),
+                    dpi=320, format='png')
+    else:
+        fig.savefig("./img/{}/Best-cm-img{}.png".format(args.model, args.bsize),
                 dpi=320, format='png')
     # print("accu: {:.4f}, ap: {:.4f}, ar: {:.4f}, f1_score: {:4f}".format(
     #     acc_all, ap_all, ar_all, f1_all))
