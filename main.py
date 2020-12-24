@@ -29,9 +29,9 @@ pars.add_argument('--epoch', '-e', type=int, default=200, metavar='E', help='epo
 pars.add_argument('--grad_clip', type=float, default=0.1, metavar='G', help='set grad_clip to avoid grad explosion')
 pars.add_argument('--weight_decay', type=float, default=1e-4, metavar='WD', help='set weight_decay')
 pars.add_argument('--data', '-d', type=str, default='./JZ20200509/', metavar='D', help='location of data folder')
-pars.add_argument('--ifSave', '-b', type=bool, default=False, metavar='B',
+pars.add_argument('--Save', default='False', action='store_true',
                   help='whether to save results during training')
-pars.add_argument('--pretrained', '-pt', type=bool, default=False, metavar='PT',
+pars.add_argument('--Pretrained', default='False', action='store_true',
                   help='do finetuning on pretrainded model')
 args = pars.parse_args()
 
