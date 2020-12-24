@@ -219,11 +219,15 @@ class ResNet(nn.Module):
 
 
 def _resnet(arch, block, layers, pretrained, progress, **kwargs):
-    model = ResNet(block, layers, **kwargs)
     if pretrained:
-        state_dict = torch.hub.load_state_dict_from_url(model_urls[arch],
-                                              progress=progress)
+        model = ResNet(block, layers, **kwargs)
+        state_dict = torch.hub.load_state_dict_from_url(model_urls[arch], progress=progress)
         model.load_state_dict(state_dict)
+        # modify out
+        fc_features = model.fc.in_features
+        model.fc = nn.Linear(fc_features, 5)
+    else:
+        model = ResNet(block, layers, num_classes=5, **kwargs)
     return model
 
 

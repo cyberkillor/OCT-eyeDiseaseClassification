@@ -88,11 +88,15 @@ cfgs = {
 def _vgg(arch, cfg, batch_norm, pretrained, progress, **kwargs):
     if pretrained:
         kwargs['init_weights'] = False
-    model = VGG(make_layers(cfgs[cfg], batch_norm=batch_norm), **kwargs)
     if pretrained:
-        state_dict = torch.hub.load_state_dict_from_url(model_urls[arch],
-                                              progress=progress)
+        model = VGG(make_layers(cfgs[cfg], batch_norm=batch_norm), **kwargs)
+        state_dict = torch.hub.load_state_dict_from_url(model_urls[arch], progress=progress)
         model.load_state_dict(state_dict)
+
+        fc_features = model.classifier[6].in_features
+        model.classifier[6] = nn.Linear(fc_features, 5)
+    else:
+        model = VGG(make_layers(cfgs[cfg], batch_norm=batch_norm), num_classes=5, **kwargs)
     return model
 
 
