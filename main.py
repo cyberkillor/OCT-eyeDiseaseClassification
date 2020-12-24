@@ -31,7 +31,7 @@ pars.add_argument('--weight_decay', type=float, default=1e-4, metavar='WD', help
 pars.add_argument('--data', '-d', type=str, default='./JZ20200509/', metavar='D', help='location of data folder')
 pars.add_argument('--Save', default='False', action='store_true',
                   help='whether to save results during training')
-pars.add_argument('--Pretrained', default='False', action='store_true',
+pars.add_argument('--pretrained', default='False', action='store_true',
                   help='do finetuning on pretrainded model')
 args = pars.parse_args()
 
