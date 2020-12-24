@@ -4,6 +4,8 @@ import torch.nn.functional as F
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
 best_accu = 0
+
+
 def accuracy(outputs, labels):
     _, preds = torch.max(outputs, dim=1)
     return torch.tensor(torch.sum(preds == labels).item() / len(preds))
@@ -47,7 +49,7 @@ def epoch_end(epoch, result, model, args):
     print("Epoch [{}], train_loss: {:.4f}, val_loss: {:.4f}, val_acc: {:.4f}".format(
         epoch, result['train_loss'], result['val_loss'], result['val_acc']))
     global best_accu
-    if args.ifSave and epoch > 80 and result['val_acc'] > best_accu and result['train_loss'] < 0.01:
+    if args.Save and epoch > 80 and result['val_acc'] > best_accu and result['train_loss'] < 0.01:
         best_accu = result['val_acc']
         print('best_accu: {}'.format(best_accu))
         torch.save({'state_dict': model.state_dict()},
