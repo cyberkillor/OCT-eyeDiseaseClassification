@@ -7,6 +7,7 @@ memory_gpu = [int(x.split()[2]) for x in open('tmp', 'r').readlines()]
 os.environ["CUDA_VISIBLE_DEVICES"] = str(np.argmax(memory_gpu))
 os.system('rm tmp')
 
+import torch_geometric
 import torch
 import torchvision.transforms as tt
 from torchvision.datasets import ImageFolder
@@ -15,6 +16,7 @@ from Models import Resnet, VGG, GoogleNet
 from GPU import get_default_device, to_device, DeviceDataLoader
 from Train import fit_one_cycle
 import argparse
+import random
 
 # initialize input
 pars = argparse.ArgumentParser()
@@ -29,10 +31,21 @@ pars.add_argument('--weight_decay', type=float, default=1e-4, metavar='WD', help
 pars.add_argument('--data', '-d', type=str, default='./JZ20200509/', metavar='D', help='location of data folder')
 pars.add_argument('--ifSave', '-b', type=bool, default=False, metavar='B',
                   help='whether to save results during training')
+pars.add_argument('--pretrained', '-pt', type=bool, default=False, metavar='PT',
+                  help='do finetuning on pretrainded model')
 args = pars.parse_args()
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 data_dir = args.data
+
+# set seed
+seed = 1111
+random.seed(seed)
+np.random.seed(seed)
+torch.manual_seed(seed)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 # pre processing
 tfms = tt.Compose([
@@ -59,11 +72,11 @@ train_dl = DeviceDataLoader(train_dl, device)
 val_dl = DeviceDataLoader(valid_dl, device)
 
 if args.model == 'res18':
-    model = Resnet.resnet18()
+    model = Resnet.resnet18(pretrained=args.pretrained)
 elif args.model == 'res34':
-    model = Resnet.resnet34()
+    model = Resnet.resnet34(pretrained=args.pretrained)
 elif args.model == 'vgg16':
-    model = VGG.vgg16_bn()
+    model = VGG.vgg16_bn(pretrained=args.pretrained)
 elif args.model == 'googlenet':
     model = GoogleNet.GoogLeNet(num_classes=5, init_weights=True)
 else:
