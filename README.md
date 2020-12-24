@@ -22,5 +22,5 @@ The data set link is https://jbox.sjtu.edu.cn/l/XH2KA7
 
 ---
 
-Sample image:
+## Sample image:
 ![image](https://github.com/cyberkillor/DIP-OCT-Classification/blob/main/img/Best-cm-img8.png)
