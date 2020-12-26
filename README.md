@@ -27,10 +27,10 @@ The data set link is https://jbox.sjtu.edu.cn/l/XH2KA7
 
 ---
 
-New section: Neural Architexture Search
+New section: Neural Architexture Search (./nas/)
 
 Reference: 
 
-"Neural Architecture Search without Training"
+"Neural Architecture Search without Training": https://github.com/gmh14/RobNets
 
-"When NAS Meets Robustness: In Search of Robust Architectures against Adversarial Attacks"
+"When NAS Meets Robustness: In Search of Robust Architectures against Adversarial Attacks": https://github.com/BayesWatch/nas-without-training
