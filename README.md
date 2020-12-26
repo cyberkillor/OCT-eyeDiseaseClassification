@@ -29,5 +29,7 @@ The data set link is https://jbox.sjtu.edu.cn/l/XH2KA7
 
 New section: Neural Architexture Search
 Reference: 
-Neural Architecture Search without Training
-When NAS Meets Robustness: In Search of Robust Architectures against Adversarial Attacks
+
+"Neural Architecture Search without Training"
+
+"When NAS Meets Robustness: In Search of Robust Architectures against Adversarial Attacks"
