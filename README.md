@@ -27,7 +27,7 @@ The data set link is https://jbox.sjtu.edu.cn/l/XH2KA7
 
 ---
 
-New section: Neural Architexture Search (./nas/)
+## New section: Neural Architexture Search (./nas/)
 
 Reference: 
 
