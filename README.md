@@ -29,7 +29,7 @@ The data set link is https://jbox.sjtu.edu.cn/l/SFh0f6
 
 ---
 
-## New section: Neural Architecture Search (./nas/)
+## New section: Neural Architecture Search (./nas)
 
 Reference: 
 
