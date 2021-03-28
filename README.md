@@ -1,5 +1,7 @@
-# DIP-OCT-Classification
+# OCT-eyeDiseaseClassification
 
+> SJTU Digital Image Process
+> 
 > This project uses current models (resnet and vgg) to do OCT eye-disease classification
 >
 > Its results can be used as Baseline of OCT research
