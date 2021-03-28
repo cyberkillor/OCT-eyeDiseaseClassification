@@ -18,7 +18,7 @@ Also you can use sklearn.metric to do your own metric measurement.
 
 To complete this project, you may need to add folder `./results/{model_name}/` and `./img/{model_name}/` to your local position.
 
-The data set link is https://jbox.sjtu.edu.cn/l/XH2KA7
+The data set link is https://jbox.sjtu.edu.cn/l/SFh0f6
 
 ---
 
